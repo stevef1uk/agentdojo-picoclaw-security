@@ -48,6 +48,27 @@ python -m agentdojo.scripts.benchmark --model gpt-4o-2024-05-13 \
     --defense tool_filter --attack tool_knowledge
 ```
 
+## Running with PicoClaw
+
+To run the benchmark against a PicoClaw instance (e.g., running on K3s or Azure), use the `--model picoclaw` flag. 
+
+### Environment Variables
+Ensure the following environment variables are set to point to your PicoClaw gateway:
+```bash
+export PICOCLAW_HOST="your-hostname"
+export PICOCLAW_PORT="your-port" # Default is 18789
+export PICOCLAW_API_KEY="your-api-key"
+```
+
+### Running the Benchmark
+Run the benchmark with the desired suite and sampling options:
+```bash
+python -m agentdojo.scripts.benchmark --model picoclaw --suite banking --benchmark-version v1 --sample-percentage 25
+```
+
+> [!NOTE]
+> The PicoClaw adapter uses a specialized `DOJO_CALL:` prefix to bypass production tool whitelists while executing benchmark-specific tools in the local runtime.
+
 ## Inspect the results
 
 To inspect the results, go to the dedicated [results page](https://agentdojo.spylab.ai/results/) of the documentation. AgentDojo results are also listed in the [Invariant Benchmark Registry](https://explorer.invariantlabs.ai/benchmarks/).Agent

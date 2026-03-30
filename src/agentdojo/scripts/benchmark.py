@@ -37,6 +37,7 @@ def benchmark_suite(
     system_message: str | None = None,
     live: Live | None = None,
     tool_output_format: Literal["yaml", "json"] | None = None,
+    sample_percentage: float | None = None,
 ) -> SuiteResults:
     if not load_dotenv(".env"):
         warnings.warn("No .env file found")
@@ -70,6 +71,7 @@ def benchmark_suite(
                 logdir=logdir,
                 force_rerun=force_rerun,
                 benchmark_version=benchmark_version,
+                sample_percentage=sample_percentage,
             )
         else:
             attacker_ = load_attack(attack, suite, pipeline)
@@ -82,6 +84,7 @@ def benchmark_suite(
                 logdir=logdir,
                 force_rerun=force_rerun,
                 benchmark_version=benchmark_version,
+                sample_percentage=sample_percentage,
             )
     print(f"Finished benchmark for suite: '{suite.name}'")
 
@@ -200,6 +203,12 @@ def show_results(suite_name: str, results: SuiteResults, show_security_results: 
     help="Whether to re-run tasks that have already been run.",
 )
 @click.option(
+    "--sample-percentage",
+    type=float,
+    default=None,
+    help="Sample a random percentage of user tasks in each suite.",
+)
+@click.option(
     "--module-to-load",
     "-ml",
     "modules_to_load",
@@ -224,6 +233,7 @@ def main(
     max_workers: int = 1,
     force_rerun: bool = False,
     modules_to_load: tuple[str, ...] = (),
+    sample_percentage: float | None = None,
 ):
     for module in modules_to_load:
         importlib.import_module(module)
@@ -255,6 +265,7 @@ def main(
                 system_message_name=system_message_name,
                 system_message=system_message,
                 force_rerun=force_rerun,
+                sample_percentage=sample_percentage,
             )
         combined_results = SuiteResults(utility_results={}, security_results={}, injection_tasks_utility_results={})
         for suite_name, result in results.items():
@@ -291,6 +302,7 @@ def main(
             repeat(system_message_name),
             repeat(system_message),
             repeat(force_rerun),
+            repeat(sample_percentage),
         )
         results = p.starmap(benchmark_suite, arguments)
 

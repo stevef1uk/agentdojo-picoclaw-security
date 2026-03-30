@@ -173,14 +173,19 @@ class AgentPipeline(BasePipelineElement):
         query: str,
         runtime: FunctionsRuntime,
         env: Env = EmptyEnv(),
-        messages: Sequence[ChatMessage] = [],
-        extra_args: dict = {},
+        messages: Sequence[ChatMessage] | None = None,
+        extra_args: dict | None = None,
     ) -> tuple[str, FunctionsRuntime, Env, Sequence[ChatMessage], dict]:
+        if messages is None:
+            messages = []
+        if extra_args is None:
+            extra_args = {}
         logger = Logger().get()
+        updated_messages = list(messages)
         for element in self.elements:
-            query, runtime, env, messages, extra_args = element.query(query, runtime, env, messages, extra_args)
-            logger.log(messages)
-        return query, runtime, env, messages, extra_args
+            query, runtime, env, updated_messages, extra_args = element.query(query, runtime, env, updated_messages, extra_args)
+            logger.log(updated_messages)
+        return query, runtime, env, updated_messages, extra_args
 
     @classmethod
     def from_config(cls, config: PipelineConfig) -> Self:

@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import warnings
 from collections.abc import Sequence
 from pathlib import Path
@@ -167,6 +168,7 @@ def benchmark_suite_with_injections(
     injection_tasks: Sequence[str] | None = None,
     verbose: bool = True,
     benchmark_version: str | None = None,
+    sample_percentage: float | None = None,
 ) -> SuiteResults:
     """Benchmark a suite with injections.
 
@@ -187,7 +189,11 @@ def benchmark_suite_with_injections(
     if user_tasks is not None:
         user_tasks_to_run = [suite.get_user_task_by_id(user_task_id) for user_task_id in user_tasks]
     else:
-        user_tasks_to_run = suite.user_tasks.values()
+        user_tasks_to_run = list(suite.user_tasks.values())
+        if sample_percentage is not None:
+            num_to_sample = max(1, int(len(user_tasks_to_run) * (sample_percentage / 100.0)))
+            user_tasks_to_run = random.sample(user_tasks_to_run, num_to_sample)
+            logging.info(f"Sampling {num_to_sample} user tasks ({sample_percentage}% of {len(suite.user_tasks)})")
 
     if injection_tasks is not None:
         injection_tasks_to_run = {
@@ -323,6 +329,7 @@ def benchmark_suite_without_injections(
     force_rerun: bool,
     user_tasks: Sequence[str] | None = None,
     benchmark_version: str | None = None,
+    sample_percentage: float | None = None,
 ) -> SuiteResults:
     """Benchmark a suite without injections.
 
@@ -342,7 +349,11 @@ def benchmark_suite_without_injections(
     if user_tasks is not None:
         user_tasks_to_run = [suite.get_user_task_by_id(user_task_id) for user_task_id in user_tasks]
     else:
-        user_tasks_to_run = suite.user_tasks.values()
+        user_tasks_to_run = list(suite.user_tasks.values())
+        if sample_percentage is not None:
+            num_to_sample = max(1, int(len(user_tasks_to_run) * (sample_percentage / 100.0)))
+            user_tasks_to_run = random.sample(user_tasks_to_run, num_to_sample)
+            logging.info(f"Sampling {num_to_sample} user tasks ({sample_percentage}% of {len(suite.user_tasks)})")
 
     for user_task in user_tasks_to_run:
         utility, security = run_task_without_injection_tasks(

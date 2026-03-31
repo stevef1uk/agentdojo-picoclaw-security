@@ -50,18 +50,31 @@ python -m agentdojo.scripts.benchmark --model gpt-4o-2024-05-13 \
 
 ## Running with PicoClaw
 
-To run the benchmark against a PicoClaw instance (e.g., running on K3s or Azure), use the `--model picoclaw` flag. 
+There are two ways to run the benchmark against PicoClaw:
 
-### Environment Variables
-Ensure the following environment variables are set to point to your PicoClaw gateway:
+### 1. Hardened Docker Benchmarking (Recommended)
+This approach runs the PicoClaw backend within a Docker container, mirroring production-parity configuration (Go backend, structural sandboxing, and strict tool-calling discipline).
+
+For full setup, requirements, and usage, see **[PICO_DOCKER_BENCHMARK.md](file:///home/stevef/dev/tomerge/github/agentdojo-picoclaw-security/PICO_DOCKER_BENCHMARK.md)**.
+
+**Quickstart**:
+```bash
+export AZURE_API_KEY="your-real-azure-api-key"
+python run_picoclaw_benchmark.py --suite banking --attack tool_knowledge
+```
+
+### 2. Remote Gateway Benchmarking
+Use this approach if you already have a running PicoClaw instance (e.g., on K3s or Azure) and want to test it via its gateway. 
+
+**Environment Variables**:
+Ensure the following are set to point to your PicoClaw gateway:
 ```bash
 export PICOCLAW_HOST="your-hostname"
 export PICOCLAW_PORT="your-port" # Default is 18789
 export PICOCLAW_API_KEY="your-api-key"
 ```
 
-### Running the Benchmark
-Run the benchmark with the desired suite and sampling options:
+**Running the Benchmark**:
 ```bash
 python -m agentdojo.scripts.benchmark --model picoclaw --suite banking --benchmark-version v1 --sample-percentage 25
 ```
